@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="page-header">
+        <a class="brand" href="./" aria-label="Project Pulse home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" focusable="false">
+              <path d="M4 17h6l3-8 5.2 15 3.2-9H28" />
+            </svg>
+          </span>
+          <span>MONA <span class="brand-divider">/</span> PROJECT PULSE</span>
+        </a>
+        <p class="header-note"><span class="live-dot" aria-hidden="true"></span> TEAM OVERVIEW</p>
+      </header>
+
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">A clearer view of what’s moving</p>
+        <h1 id="page-title">Project <span>Pulse</span></h1>
+        <p class="intro-copy">The latest across Mona’s team—what’s on track, what needs a hand, and what’s next.</p>
+      </section>
+
+      <section class="dashboard-summary" aria-label="Dashboard summary">
+        <div>
+          <span class="summary-label">ACTIVE PORTFOLIO</span>
+          <p class="summary-value" id="project-count">Loading projects…</p>
+        </div>
+        <p class="summary-aside">Small updates. Shared momentum.</p>
+      </section>
+
+      <section aria-label="Projects">
+        <div class="dashboard" id="project-list" aria-live="polite" aria-busy="true">
+          <p class="loading-state">Gathering the latest project updates…</p>
+        </div>
+      </section>
+
+      <footer class="page-footer">
+        <span>MADE FOR MOMENTUM</span>
+        <span>MONA’S TEAM <span aria-hidden="true">·</span> PROJECT PULSE</span>
+      </footer>
+    </main>
+
+    <script>
+      const projectList = document.querySelector("#project-list");
+      const projectCount = document.querySelector("#project-count");
+      const knownStatuses = new Set(["On track", "At risk", "In progress"]);
+      const knownPriorities = new Set(["High", "Medium", "Low"]);
+
+      function getModifier(value, knownValues, prefix) {
+        if (!knownValues.has(value)) return `${prefix}--unknown`;
+        return `${prefix}--${value.toLowerCase().replaceAll(" ", "-")}`;
+      }
+
+      function addTextElement(parent, tagName, className, text) {
+        const element = document.createElement(tagName);
+        element.className = className;
+        element.textContent = text;
+        parent.append(element);
+        return element;
+      }
+
+      function renderProject(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const topLine = document.createElement("div");
+        topLine.className = "card-topline";
+
+        const status = document.createElement("span");
+        status.className = `status-badge ${getModifier(project.status, knownStatuses, "status")}`;
+        status.textContent = project.status || "Status unknown";
+        topLine.append(status);
+
+        addTextElement(topLine, "span", "project-index", "PROJECT");
+        card.append(topLine);
+
+        addTextElement(card, "h2", "", project.name || "Untitled project");
+
+        const meta = document.createElement("p");
+        meta.className = "project-meta";
+        meta.append(document.createTextNode("Led by "));
+        const owner = document.createElement("strong");
+        owner.textContent = project.owner || "Unassigned";
+        meta.append(owner);
+        card.append(meta);
+
+        addTextElement(card, "p", "project-summary", project.summary || "A team project in progress.");
+
+        const activity = document.createElement("div");
+        activity.className = "project-activity";
+        addTextElement(activity, "span", "detail-label", "LATEST UPDATE");
+        addTextElement(activity, "p", "", project.recentActivity || "No recent activity reported.");
+        card.append(activity);
+
+        const footer = document.createElement("div");
+        footer.className = "card-footer";
+        addTextElement(footer, "span", "detail-label", "PRIORITY");
+        const priority = document.createElement("span");
+        priority.className = `priority-badge ${getModifier(project.priority, knownPriorities, "priority")}`;
+        priority.textContent = project.priority || "Unknown";
+        footer.append(priority);
+        card.append(footer);
+
+        return card;
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`Project data request failed (${response.status}).`);
+          }
+
+          const data = await response.json();
+          if (!data || !Array.isArray(data.projects)) {
+            throw new Error("Project data must contain a projects array.");
+          }
+
+          projectList.replaceChildren();
+          if (data.projects.length === 0) {
+            addTextElement(projectList, "p", "empty-state", "No projects yet. Check back soon for team updates.");
+            projectCount.textContent = "0 projects";
+            return;
+          }
+
+          for (const project of data.projects) {
+            if (!project || typeof project !== "object") {
+              throw new Error("Each project must be a valid object.");
+            }
+            projectList.append(renderProject(project));
+          }
+
+          projectCount.textContent = `${data.projects.length} ${data.projects.length === 1 ? "project" : "projects"} in motion`;
+        } catch (error) {
+          projectList.replaceChildren();
+          addTextElement(projectList, "p", "error-state", `We couldn’t load project updates. ${error.message}`);
+          projectCount.textContent = "Updates unavailable";
+        } finally {
+          projectList.setAttribute("aria-busy", "false");
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>

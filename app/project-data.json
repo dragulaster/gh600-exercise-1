@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "name": "Atlas onboarding",
+      "owner": "Priya Shah",
+      "status": "On track",
+      "recentActivity": "The welcome flow is ready for a final review with the support team.",
+      "priority": "High",
+      "summary": "Helping every new customer find their first win, faster."
+    },
+    {
+      "name": "Northstar analytics",
+      "owner": "Mateo Ruiz",
+      "status": "In progress",
+      "recentActivity": "Event tracking is connected; the team is checking dashboard numbers against source data.",
+      "priority": "Medium",
+      "summary": "Turning product signals into clear, useful decisions."
+    },
+    {
+      "name": "Mobile refresh",
+      "owner": "Aisha Okafor",
+      "status": "At risk",
+      "recentActivity": "The design review surfaced two accessibility fixes before implementation can wrap.",
+      "priority": "High",
+      "summary": "A calmer, more accessible experience across every screen."
+    },
+    {
+      "name": "Community playbook",
+      "owner": "Eli Chen",
+      "status": "On track",
+      "recentActivity": "Contributor feedback is in, and the first draft is ready to share.",
+      "priority": "Low",
+      "summary": "Making it easier for new contributors to find their place."
+    }
+  ]
+}
